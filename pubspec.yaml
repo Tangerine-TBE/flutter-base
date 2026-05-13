@@ -17,7 +17,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   package_info_plus: ^10.1.0
-  getwidget: ^3.0.1 # UI Kit library built with Flutter SDK
+  getwidget: ^7.0.0
   pull_to_refresh: 2.0.0 # 上拉加载下拉刷新
 
   ## ---- log ----

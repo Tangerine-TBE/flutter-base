@@ -217,10 +217,10 @@ packages:
     dependency: "direct main"
     description:
       name: getwidget
-      sha256: "6bdf191f91de5f80f9abd49e3cffaef66256167aaa091626ac78d5c81c645335"
+      sha256: ab0201d6c1d27b508f05fa571e0e5038d60a603fd80303002b882f18b1c77231
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.1.1"
+    version: "7.0.0"
   glob:
     dependency: transitive
     description:
