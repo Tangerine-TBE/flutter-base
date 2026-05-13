@@ -9,27 +9,27 @@ dependencies:
   flutter:
     sdk: flutter
   ## ---- common ----
-  get: ^4.6.6
+  get: ^4.7.3
   get_storage: ^2.1.1 # 本地存储
   flutter_easyloading: ^3.0.5 # loading效果
   image_picker: ^1.0.7 # 图片选中库
   intl: any
   flutter_localizations:
     sdk: flutter
-  package_info_plus: ^7.0.0
+  package_info_plus: ^10.1.0
   getwidget: ^3.0.1 # UI Kit library built with Flutter SDK
   pull_to_refresh: 2.0.0 # 上拉加载下拉刷新
 
   ## ---- log ----
-  logger: ^2.0.2
+  logger: ^2.7.0
 
   ## ---- network ----
-  dio: ^5.2.1 # 网络请求
-  crypto: ^3.0.3  #MD5
+  dio: ^5.9.2
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
