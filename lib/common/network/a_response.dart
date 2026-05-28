@@ -54,14 +54,23 @@ class AResponse<T> {
             break;
           case DioExceptionType.badResponse:
             if (error.response != null) {
-              String? data = error.response!.data;
-              if (data != null && data.isNotEmpty) {
-                Map<String, dynamic> map = jsonDecode(error.response!.data!);
-                msg = map['message'] ?? '響應报文异常';
-                break;
+              if (error.response?.statusCode != null) {
+                if (error.response?.statusCode == 401) {
+                  code = 401;
+                  msg = "认证错误";
+                } else {
+                  String? data = error.response!.data;
+                  if (data != null && data.isNotEmpty) {
+                    Map<String, dynamic> map =
+                        jsonDecode(error.response!.data!);
+                    msg = map['message'] ?? '響應报文异常';
+                    break;
+                  }
+                }
               }
+            } else {
+              msg = "響應报文异常";
             }
-            msg = "響應报文异常";
             break;
           case DioExceptionType.unknown:
             code = timeOut;
