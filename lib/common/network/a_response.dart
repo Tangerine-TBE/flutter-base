@@ -85,15 +85,147 @@ class AResponse<T> {
     }
   }
 
+  static Future<Stream<AResponse<T>>> convertStream<T>(
+      Future<Stream<String>> Function() futureTask,
+      T? Function(dynamic data)? onResponse) async {
+    return await futureTask().then(
+      (streamResponse) => handleStreamResponse(
+        streamResponse,
+        onResponse,
+      ),
+    );
+  }
+
+static Stream<AResponse<T>> handleStreamResponse<T>(
+  Stream<String> streamResponse,
+  T? Function(dynamic data)? onResponse,
+) {
+  // 用于标记是否已经发送过 start
+  bool hasSentStart = false;
+
+  // 1. 原始流 → JSON → AResponse
+  final dataStream = streamResponse
+      .transform(_jsonObjectDecoder())
+      .map((json) {
+        return AResponse<T>(
+          onResponse?.call(json),
+          code: 200,
+          message: "streaming",
+        );
+      })
+      .timeout(const Duration(seconds: 15), onTimeout: (sink) {
+        sink.add(AResponse<T>(null, code: 504, message: "timeout"));
+        sink.close();
+      });
+
+  // 2. 包装成完整生命周期：start → streaming → done/error/timeout
+  return dataStream.transform(
+    StreamTransformer<AResponse<T>, AResponse<T>>.fromHandlers(
+      handleData: (data, sink) {
+        // 第一次收到数据 → 先发 start
+        if (!hasSentStart) {
+          hasSentStart = true;
+          sink.add(AResponse<T>(null, code: 200, message: "start"));
+        }
+        // 再发真实数据
+        sink.add(data);
+      },
+      handleError: (err, stack, sink) {
+        sink.add(AResponse<T>(null, code: 500, message: "error"));
+        sink.close();
+      },
+      handleDone: (sink) {
+        // 流正常结束
+        sink.add(AResponse<T>(null, code: 200, message: "done"));
+        sink.close();
+      },
+    ),
+  );
+}
+
+  static StreamTransformer<String, Map<String, dynamic>> _jsonObjectDecoder() {
+    String buffer = '';
+    int depth = 0;
+    bool inString = false;
+    bool escaped = false;
+
+    return StreamTransformer.fromHandlers(
+      handleData: (String chunk, EventSink<Map<String, dynamic>> sink) {
+        for (int i = 0; i < chunk.length; i++) {
+          final String char = chunk[i];
+          buffer += char;
+
+          if (escaped) {
+            escaped = false;
+            continue;
+          }
+
+          if (char == '\\') {
+            escaped = true;
+            continue;
+          }
+
+          if (char == '"') {
+            inString = !inString;
+          }
+
+          if (!inString) {
+            if (char == '{' || char == '[') {
+              depth++;
+            } else if (char == '}' || char == ']') {
+              depth--;
+            }
+          }
+
+          if (!inString && depth == 0 && buffer.trim().isNotEmpty) {
+            try {
+              final dynamic json = jsonDecode(buffer.trim());
+              if (json is Map<String, dynamic>) {
+                sink.add(json);
+              } else {
+                sink.addError(FormatException(
+                    'Stream result is not a JSON object: ${buffer.trim()}'));
+              }
+            } catch (error, stack) {
+              sink.addError(error, stack);
+            }
+            buffer = '';
+          }
+        }
+      },
+      handleDone: (EventSink<Map<String, dynamic>> sink) {
+        if (buffer.trim().isNotEmpty) {
+          try {
+            final dynamic json = jsonDecode(buffer.trim());
+            if (json is Map<String, dynamic>) {
+              sink.add(json);
+            } else {
+              sink.addError(FormatException(
+                  'Stream result is not a JSON object: ${buffer.trim()}'));
+            }
+          } catch (error, stack) {
+            sink.addError(error, stack);
+          }
+        }
+        sink.close();
+      },
+    );
+  }
+
   /// 處理ResponseBean的map數據
   static AResponse<T> handleDioResponse<T>(
     Response<String> dioResponse,
     T? Function(dynamic data)? onResponse,
   ) {
-    Map<String, dynamic> map = jsonDecode(dioResponse.data!);
-    var status = map["status"] ?? dioResponse.statusCode;
-    var code = map["code"] ?? dioResponse.statusMessage;
-    var result = map["result"] ?? map; // data 可能是List 或 Object 或 基本數據類型（bool）
+    var map = jsonDecode(dioResponse.data!);
+    var status = dioResponse.statusCode;
+    var code = dioResponse.statusMessage;
+    var result = map;
+    if (map is Map) {
+      status = map["status"] ?? dioResponse.statusCode;
+      code = map["code"] ?? dioResponse.statusMessage;
+      result = map["result"] ?? map; // data 可能是List 或 Object 或 基本數據類型（bool）
+    }
     logger.w(
         ("---> header status code: ${dioResponse.statusCode}, message: ${dioResponse.statusMessage}"));
     logger.i("---> response: code[$code], || "

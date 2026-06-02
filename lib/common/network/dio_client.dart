@@ -1,5 +1,6 @@
 library network;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -174,21 +175,43 @@ abstract class DioClient {
       method: method,
       cancelToken: cancelToken,
     );
-    // var json = jsonDecode(response.data!);
-    // var code = response.statusCode;
-    // var msg = response.statusMessage;
     return response;
   }
 
-  ///dio--request请求
-  Future<Response<String>> _dioRequest(
+  /// 流式请求，用于接收服务器端持续返回的 JSON 对象流
+  Future<Stream<String>> requestOnStream<T>({
+    required String path,
+    Map<String, dynamic>? params,
+    Options? options,
+    Method method = Method.get,
+    CancelToken? cancelToken,
+    AResponse<T> Function(dynamic data)? onResponse,
+  }) async {
+    Response<ResponseBody> response = await _dioRequestStream(
+      path,
+      params: params,
+      options: options,
+      method: method,
+      cancelToken: cancelToken,
+    );
+
+    return response.data!.stream
+        .cast<List<int>>()
+        .transform(utf8.decoder);
+ 
+  }
+
+  Future<Response<ResponseBody>> _dioRequestStream(
     String path, {
     Map<String, dynamic>? params,
     Options? options,
     Method method = Method.get,
     CancelToken? cancelToken,
   }) async {
-    Response<String> response;
+    options = options?.copyWith(responseType: ResponseType.stream) ??
+        Options(responseType: ResponseType.stream);
+
+    Response<ResponseBody> response;
     switch (method) {
       case Method.get:
         response = await _dio.get(
@@ -225,4 +248,51 @@ abstract class DioClient {
     }
     return response;
   }
+
+
+  ///dio--request请求
+  Future<Response<String>> _dioRequest(
+    String path, {
+      Map<String, dynamic>? params,
+      Options? options,
+      Method method = Method.get,
+      CancelToken? cancelToken,
+    }) async {
+      Response<String> response;
+      switch (method) {
+        case Method.get:
+          response = await _dio.get(
+            path,
+            queryParameters: params,
+            options: options,
+            cancelToken: cancelToken,
+          );
+          break;
+        case Method.post:
+          response = await _dio.post(
+            path,
+            data: params,
+            cancelToken: cancelToken,
+            options: options,
+          );
+          break;
+        case Method.put:
+          response = await _dio.put(
+            path,
+            data: params,
+            options: options,
+            cancelToken: cancelToken,
+          );
+          break;
+        default:
+          response = await _dio.get(
+            path,
+            queryParameters: params,
+            options: options,
+            cancelToken: cancelToken,
+          );
+          break;
+      }
+      return response;
+    }
 }

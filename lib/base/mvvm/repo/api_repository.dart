@@ -44,6 +44,24 @@ abstract class ApiRepository {
     );
   }
 
+  Future<Stream<AResponse<T>>> requestOnStream<T>(
+    String path, {
+    Method method = Method.get,
+    Map<String, dynamic>? params,
+    Options? options,
+    T? Function(dynamic data)? format,
+  }) {
+    var futureTask = proxy.requestOnStream<T?>(
+      path: path,
+      options: options,
+      method: method,
+      params: params,
+      // onResponse: (data) => format?.call(data),
+    );
+    return AResponse.convertStream<T>(
+        () => futureTask, (data) => format?.call(data));
+  }
+
   /// 单文件上传 bytes形式
   Future<AResponse<F>> uploadFileBytes<F>({
     required String url,
