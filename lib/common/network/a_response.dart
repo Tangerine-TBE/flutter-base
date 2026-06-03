@@ -86,62 +86,116 @@ class AResponse<T> {
   }
 
   static Future<Stream<AResponse<T>>> convertStream<T>(
-      Future<Stream<String>> Function() futureTask,
+      Future<Response<ResponseBody>> Function() futureTask,
       T? Function(dynamic data)? onResponse) async {
-    return await futureTask().then(
-      (streamResponse) => handleStreamResponse(
-        streamResponse,
-        onResponse,
+    try {
+      return await futureTask().then(
+        (streamResponse) => handleStreamResponse(
+          streamResponse,
+          onResponse,
+        ),
+      );
+    } catch (error) {
+      logger.e("---- Response.convert() ====> catch request error: $error");
+      if (error is DioException) {
+        int code = 0;
+        String msg = "";
+        switch (error.type) {
+          case DioExceptionType.cancel:
+            msg = "請求取消";
+            break;
+          case DioExceptionType.connectionTimeout:
+            code = timeOut;
+            msg = "連接超時";
+            break;
+          case DioExceptionType.sendTimeout:
+            code = timeOut;
+            msg = "請求超時";
+            break;
+          case DioExceptionType.receiveTimeout:
+            code = timeOut;
+            msg = "響應超時";
+            break;
+          case DioExceptionType.badResponse:
+            if (error.response != null) {
+              if (error.response?.statusCode != null) {
+                if (error.response?.statusCode == 401) {
+                  code = 401;
+                  msg = "认证错误";
+                } else {
+                  String? data = error.response!.data;
+                  if (data != null && data.isNotEmpty) {
+                    Map<String, dynamic> map =
+                        jsonDecode(error.response!.data!);
+                    msg = map['message'] ?? '響應报文异常';
+                    break;
+                  }
+                }
+              }
+            } else {
+              msg = "響應报文异常";
+            }
+            break;
+          case DioExceptionType.unknown:
+            code = timeOut;
+            msg = "網絡異常";
+            break;
+          default:
+            break;
+        }
+        return Stream.value(AResponse(null, code: code, message: msg));
+      }
+      return Stream.value(AResponse(null, message: error.toString()));
+    }
+  }
+
+  static Stream<AResponse<T>> handleStreamResponse<T>(
+    Response<ResponseBody> streamResponse,
+    T? Function(dynamic data)? onResponse,
+  ) {
+    // 用于标记是否已经发送过 start
+    bool hasSentStart = false;
+
+    // 1. 原始流 → JSON → AResponse
+    final dataStream = streamResponse.data!.stream
+        .cast<List<int>>()
+        .transform(utf8.decoder)
+        .transform(_jsonObjectDecoder())
+        .map((json) {
+      return AResponse<T>(
+        onResponse?.call(json),
+        code: 200,
+        message: "streaming",
+      );
+    }).timeout(const Duration(seconds: 15), onTimeout: (sink) {
+      sink.add(AResponse<T>(null, code: 504, message: "timeout"));
+      sink.close();
+    });
+
+    // 2. 包装成完整生命周期：start → streaming → done/error/timeout
+    return dataStream.transform(
+      StreamTransformer<AResponse<T>, AResponse<T>>.fromHandlers(
+        handleData: (data, sink) {
+          // 第一次收到数据 → 先发 start
+          if (!hasSentStart) {
+            hasSentStart = true;
+            sink.add(AResponse<T>(null, code: 200, message: "start"));
+          }
+          // 再发真实数据
+          sink.add(data);
+        },
+        handleError: (err, stack, sink) {
+          sink.add(AResponse<T>(null, code: 500, message: "error"));
+          sink.close();
+        },
+        handleDone: (sink) {
+          // 流正常结束
+          sink.add(AResponse<T>(null, code: 200, message: "done"));
+          sink.close();
+        },
       ),
     );
   }
-
-static Stream<AResponse<T>> handleStreamResponse<T>(
-  Stream<String> streamResponse,
-  T? Function(dynamic data)? onResponse,
-) {
-  // 用于标记是否已经发送过 start
-  bool hasSentStart = false;
-
-  // 1. 原始流 → JSON → AResponse
-  final dataStream = streamResponse
-      .transform(_jsonObjectDecoder())
-      .map((json) {
-        return AResponse<T>(
-          onResponse?.call(json),
-          code: 200,
-          message: "streaming",
-        );
-      })
-      .timeout(const Duration(seconds: 15), onTimeout: (sink) {
-        sink.add(AResponse<T>(null, code: 504, message: "timeout"));
-        sink.close();
-      });
-
-  // 2. 包装成完整生命周期：start → streaming → done/error/timeout
-  return dataStream.transform(
-    StreamTransformer<AResponse<T>, AResponse<T>>.fromHandlers(
-      handleData: (data, sink) {
-        // 第一次收到数据 → 先发 start
-        if (!hasSentStart) {
-          hasSentStart = true;
-          sink.add(AResponse<T>(null, code: 200, message: "start"));
-        }
-        // 再发真实数据
-        sink.add(data);
-      },
-      handleError: (err, stack, sink) {
-        sink.add(AResponse<T>(null, code: 500, message: "error"));
-        sink.close();
-      },
-      handleDone: (sink) {
-        // 流正常结束
-        sink.add(AResponse<T>(null, code: 200, message: "done"));
-        sink.close();
-      },
-    ),
-  );
-}
 
   static StreamTransformer<String, Map<String, dynamic>> _jsonObjectDecoder() {
     String buffer = '';

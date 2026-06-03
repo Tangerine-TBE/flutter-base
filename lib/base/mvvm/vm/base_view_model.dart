@@ -57,7 +57,7 @@ abstract class BaseViewModel extends SuperController with NavigationHelper {
 
     // status - error
     if (!response.isSuccess) {
-      _handleResponseError(response);
+      handleResponseError(response);
       return null;
     }
 
@@ -121,7 +121,7 @@ abstract class BaseViewModel extends SuperController with NavigationHelper {
     if (errors.isNotEmpty) {
       for (AResponse error in errors) {
         bool isBreak =
-            _handleResponseError(error, breakOn: [unauthorized, forbidden]);
+            handleResponseError(error, breakOn: [unauthorized, forbidden]);
         if (isBreak) break;
       }
     }
@@ -131,7 +131,7 @@ abstract class BaseViewModel extends SuperController with NavigationHelper {
 
   /// 錯誤代碼處理
   /// breakCode: 如果和请求code匹配，就返回true
-  bool _handleResponseError(
+  bool handleResponseError(
     AResponse response, {
     List<int> breakOn = const [],
   }) {
