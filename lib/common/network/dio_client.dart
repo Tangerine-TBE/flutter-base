@@ -234,6 +234,10 @@ abstract class DioClient {
           cancelToken: cancelToken,
         );
         break;
+      case Method.delete:
+        response = await _dio.delete(path,
+            data: params, options: options, cancelToken: cancelToken);
+        break;
       default:
         response = await _dio.get(
           path,
