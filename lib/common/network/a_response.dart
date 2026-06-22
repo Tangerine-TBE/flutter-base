@@ -272,12 +272,12 @@ class AResponse<T> {
     T? Function(dynamic data)? onResponse,
   ) {
     var map = jsonDecode(dioResponse.data!);
-    var status = dioResponse.statusCode;
-    var code = dioResponse.statusMessage;
+    var status = dioResponse.statusMessage;
+    var code = dioResponse.statusCode ;
     var result = map;
     if (map is Map) {
-      status = map["status"] ?? dioResponse.statusCode;
-      code = map["code"] ?? dioResponse.statusMessage;
+      status = map["msg"] ?? dioResponse.statusMessage;
+      code = map["code"] ?? dioResponse.statusCode;
       result = map["result"] ?? map; // data 可能是List 或 Object 或 基本數據類型（bool）
     }
     logger.w(
@@ -287,8 +287,8 @@ class AResponse<T> {
         "${const JsonEncoder.withIndent('  ').convert(result)}");
     return AResponse(
       onResponse?.call(result),
-      code: status,
-      message: code,
+      code: code ,
+      message: status,
     );
   }
 }
