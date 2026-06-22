@@ -238,14 +238,6 @@ abstract class DioClient {
         response = await _dio.delete(path,
             data: params, options: options, cancelToken: cancelToken);
         break;
-      default:
-        response = await _dio.get(
-          path,
-          queryParameters: params,
-          options: options,
-          cancelToken: cancelToken,
-        );
-        break;
     }
     return response;
   }
@@ -284,13 +276,9 @@ abstract class DioClient {
           cancelToken: cancelToken,
         );
         break;
-      default:
-        response = await _dio.get(
-          path,
-          queryParameters: params,
-          options: options,
-          cancelToken: cancelToken,
-        );
+      case Method.delete:
+        response = await _dio.delete(path,
+            queryParameters: params, options: options, cancelToken: cancelToken);
         break;
     }
     return response;
