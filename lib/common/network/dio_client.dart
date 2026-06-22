@@ -22,7 +22,7 @@ part './logger.dart';
 
 part './a_response.dart';
 
-enum Method { get, post, put, delete }
+enum Method { get, post, put, delete, patch }
 
 /// 封裝 - 初始化入口install()
 abstract class DioClient {
@@ -238,6 +238,10 @@ abstract class DioClient {
         response = await _dio.delete(path,
             data: params, options: options, cancelToken: cancelToken);
         break;
+      case Method.patch:
+        response = await _dio.patch(path,
+            data: params, options: options, cancelToken: cancelToken);
+        break;
     }
     return response;
   }
@@ -278,7 +282,13 @@ abstract class DioClient {
         break;
       case Method.delete:
         response = await _dio.delete(path,
-            queryParameters: params, options: options, cancelToken: cancelToken);
+            queryParameters: params,
+            options: options,
+            cancelToken: cancelToken);
+        break;
+      case Method.patch:
+        response = await _dio.patch(path,
+            data: params, options: options, cancelToken: cancelToken);
         break;
     }
     return response;
