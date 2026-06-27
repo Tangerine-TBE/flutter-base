@@ -16,7 +16,8 @@ class AResponse<T> {
   bool get isEmpty => data == null;
 
   // 是否請求成功
-  bool get isSuccess => code == 200 ||  code == 201 || code == 203 || code == 204;
+  bool get isSuccess =>
+      code == 200 || code == 201 || code == 203 || code == 204;
 
   // 是否需要重新登录
   bool get isUnAuthorized => code == 401 || code == 403;
@@ -271,9 +272,9 @@ class AResponse<T> {
     Response<String> dioResponse,
     T? Function(dynamic data)? onResponse,
   ) {
-    var map = jsonDecode(dioResponse.data!);
+    var map = jsonDecode(dioResponse.data ?? '{}');
     var status = dioResponse.statusMessage;
-    var code = dioResponse.statusCode ;
+    var code = dioResponse.statusCode;
     var result = map;
     if (map is Map) {
       status = map["msg"] ?? dioResponse.statusMessage;
@@ -287,7 +288,7 @@ class AResponse<T> {
         "${const JsonEncoder.withIndent('  ').convert(result)}");
     return AResponse(
       onResponse?.call(result),
-      code: code ,
+      code: code,
       message: status,
     );
   }
