@@ -272,7 +272,12 @@ class AResponse<T> {
     Response<String> dioResponse,
     T? Function(dynamic data)? onResponse,
   ) {
-    var map = jsonDecode(dioResponse.data ?? '{}');
+    var map;
+    if(dioResponse.data?.isNotEmpty == true){
+        map = jsonDecode(dioResponse.data! );
+    }else{
+        map = jsonDecode('{}' );
+    }
     var status = dioResponse.statusMessage;
     var code = dioResponse.statusCode;
     var result = map;
