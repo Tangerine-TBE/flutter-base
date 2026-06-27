@@ -16,7 +16,7 @@ class AResponse<T> {
   bool get isEmpty => data == null;
 
   // 是否請求成功
-  bool get isSuccess => code == 200 ||  code == 201 || code == 203;
+  bool get isSuccess => code == 200 ||  code == 201 || code == 203 || code == 204;
 
   // 是否需要重新登录
   bool get isUnAuthorized => code == 401 || code == 403;
