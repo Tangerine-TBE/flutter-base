@@ -128,7 +128,13 @@ class AResponse<T> {
                   if (data != null && data.isNotEmpty) {
                     Map<String, dynamic> map =
                         jsonDecode(error.response!.data!);
-                    msg = map['message'] ?? '響應报文异常';
+                    if (map['detail'] is List) {
+                      msg = 'ok';
+                    } else if (map['detail'] is String) {
+                      msg = map['detail'] ?? '響應报文异常';
+                    } else {
+                      msg = 'ok';
+                    }
                     break;
                   }
                 }
@@ -273,10 +279,10 @@ class AResponse<T> {
     T? Function(dynamic data)? onResponse,
   ) {
     var map;
-    if(dioResponse.data?.isNotEmpty == true){
-        map = jsonDecode(dioResponse.data! );
-    }else{
-        map = jsonDecode('{}' );
+    if (dioResponse.data?.isNotEmpty == true) {
+      map = jsonDecode(dioResponse.data!);
+    } else {
+      map = jsonDecode('{}');
     }
     var status = dioResponse.statusMessage;
     var code = dioResponse.statusCode;
