@@ -47,7 +47,7 @@ abstract class ApiRepository {
   Future<AResponse<T>> requetFormData<T>(
     // 路由
     String path, {
-    List<FormData>? params,
+    FormData? params,
     Options? options,
     T? Function(dynamic data)? format,
   }) async {

@@ -127,7 +127,7 @@ abstract class DioClient {
 
   Future<Response<String>> formDataUpload({
     required String url,
-     List<FormData>? data,
+     FormData? data,
     Options? options,
     CancelToken? cancelToken,
   }) async {
