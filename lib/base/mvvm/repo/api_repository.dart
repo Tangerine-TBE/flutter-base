@@ -44,6 +44,25 @@ abstract class ApiRepository {
     );
   }
 
+  Future<AResponse<T>> requetFormData<T>(
+    // 路由
+    String path, {
+    List<FormData>? params,
+    Options? options,
+    T? Function(dynamic data)? format,
+  }) async {
+    var futureTask = proxy.formDataUpload(
+      options: options,
+      cancelToken: _globalCancelToken,
+      url: path,
+      data: params,
+    );
+    return AResponse.convert<T>(
+      () => futureTask,
+      (data) => format?.call(data),
+    );
+  }
+
   Future<Stream<AResponse<T>>> requestOnStream<T>(
     String path, {
     Method method = Method.get,

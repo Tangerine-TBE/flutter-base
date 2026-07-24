@@ -125,6 +125,20 @@ abstract class DioClient {
     );
   }
 
+  Future<Response<String>> formDataUpload({
+    required String url,
+     List<FormData>? data,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    return await _dio.post(
+      url,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
+    );
+  }
+
   /// 多文件上传
   Future<Response<String>> uploadFiles({
     required String url,
