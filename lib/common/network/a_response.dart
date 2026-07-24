@@ -64,7 +64,13 @@ class AResponse<T> {
                   if (data != null && data.isNotEmpty) {
                     Map<String, dynamic> map =
                         jsonDecode(error.response!.data!);
-                    msg = map['detail'] ?? '響應报文异常';
+                    if (map['detail'] is List) {
+                      msg = 'ok';
+                    } else if (map['detail'] is String) {
+                      msg = map['detail'] ?? '響應报文异常';
+                    } else {
+                      msg = 'ok';
+                    }
                     break;
                   }
                 }
