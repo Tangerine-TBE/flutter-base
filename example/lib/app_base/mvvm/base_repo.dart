@@ -11,7 +11,6 @@ import '../repository/api.dart';
 part '../repository/menu_repo.dart';
 
 // models
-part '../model/menu_status.dart';
 
 /// 业务层的base请求仓库
 class BaseRepo extends ApiRepository {

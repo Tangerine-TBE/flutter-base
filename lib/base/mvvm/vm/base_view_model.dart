@@ -1,19 +1,13 @@
-import 'package:common/common/widget/loading/g_loading.dart';
-import 'package:get/get.dart';
-
 import '../../../common/log/a_logger.dart';
 import '../../../common/network/dio_client.dart';
 import '../../../common/network/status_code.dart';
-import '../../helper/navigation_helper.dart';
 import '../repo/api_repository.dart';
 
 /// Controller基類
 /// BaseVM
-abstract class BaseViewModel extends SuperController with NavigationHelper {
+abstract class BaseViewModel    {
   /// 頁面狀態 - loading
-  void showLoading({bool userInteraction = true}) =>
-      GLoading.instance.showLoading(userInteraction);
-
+  void showLoading({bool userInteraction = true});
   /// 頁面狀態 - 空
   void showEmpty();
 
@@ -30,21 +24,9 @@ abstract class BaseViewModel extends SuperController with NavigationHelper {
   void resetShow() {}
 
   /// 頁面狀態 - loading、空、錯誤均關閉
-  void dismiss() => GLoading.instance.dismiss();
+  void dismiss();
 
-  /// 生命週期 - onInit
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
-  /// 生命週期 - onClose
-  @override
-  void onClose() {
-    dismiss();
-    super.onClose();
-  }
-
+ 
   /// 執行future
   Future<T?> apiLaunch<T>(
     Future<AResponse<T>> Function() futureTask, {
@@ -63,9 +45,7 @@ abstract class BaseViewModel extends SuperController with NavigationHelper {
 
     // status - empty
     var data = response.data;
-    if (data is DataHolder) {
-      if (data.isEmpty()) showEmpty();
-    } else if (response.isEmpty) {
+    if (response.isEmpty) {
       showEmpty();
     }
 
@@ -111,11 +91,7 @@ abstract class BaseViewModel extends SuperController with NavigationHelper {
     for (var response in responses) {
       if (!response.isSuccess) errors.add(response);
       dynamic data = response.data;
-      if (data is DataHolder) {
-        results.add(data.dataList ?? data.data);
-      } else {
         results.add(data);
-      }
     }
 
     if (errors.isNotEmpty) {

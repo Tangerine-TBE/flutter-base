@@ -5,7 +5,7 @@ import 'package:common/common/top.dart';
 class BaseController extends BaseViewModel {
   @override
   void handleUnAuthorizedError(String? message) {
-    showToast("401 or 403 : $message");
+    // showToast("401 or 403 : $message");
   }
 
   @override
@@ -13,7 +13,7 @@ class BaseController extends BaseViewModel {
 
   @override
   void showError(String? message) {
-    showToast(message);
+    // showToast(message);
   }
 
   @override
@@ -23,6 +23,14 @@ class BaseController extends BaseViewModel {
 
   @override
   void onHidden() {
+  }
+
+  @override
+  void dismiss() {
+  }
+
+  @override
+  void showLoading({bool userInteraction = true}) {
   }
 
 }

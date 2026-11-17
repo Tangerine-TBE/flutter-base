@@ -1,6 +1,4 @@
-import 'package:common/common/widget/loading/g_loading.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../common/launcher/a_launcher_strategy.dart';
 import '../../common/log/a_logger.dart';
@@ -24,17 +22,10 @@ abstract class BaseMaterialApp<T extends ALauncherStrategy>
   late ARoute route;
 
   /// material app
-  GetMaterialApp buildApp(BuildContext context) =>
-      GetMaterialApp(
-        builder: (context, child) {
-          // 安装loading
-          child = GLoading.instance.init(context, child);
-          return child;
-        },
-        popGesture: true,
-        getPages: route.getPages(),
-        initialRoute: route.initialRoute,
-        defaultTransition: Transition.rightToLeftWithFade,
+  MaterialApp buildApp(BuildContext context) =>
+      MaterialApp.router(
+        routerConfig: route.getGoRouter(),
+        
       );
 
 

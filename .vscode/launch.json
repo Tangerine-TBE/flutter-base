@@ -7,13 +7,15 @@
         {
             "name": "base",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "app/launcher/flavor/dev.dart"
         },
         {
             "name": "base (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "program": "app/launcher/flavor/dev.dart"
         },
         {
             "name": "base (release mode)",
