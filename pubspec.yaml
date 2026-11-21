@@ -2,19 +2,19 @@ name: common
 description: A new Flutter package project.
 
 environment:
-  sdk: ">=3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ^3.9.2
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:
     sdk: flutter
   ## ---- common ----
-  flutter_easyloading: ^3.0.5 # loading效果
-  image_picker: ^1.0.7 # 图片选中库
+  flutter_easyloading: ^4.0.2 # loading效果
+  image_picker: ^1.2.2 # 图片选中库，1.2.4 需 Dart >=3.11
   intl: any
   flutter_localizations:
     sdk: flutter
-  package_info_plus: ^9.0.1
+  package_info_plus: ^9.0.1 # 10.x 需 Dart >=3.10，暂不升级
 
   ## ---- log ----
   logger: ^2.7.0
@@ -22,8 +22,8 @@ dependencies:
   ## ---- network ----
   dio: ^5.9.2
   crypto: ^3.0.7
-  riverpod: ^3.5.0
-  go_router: ^18.1.4
+  riverpod: ^3.3.2 # 3.4+ 需 Dart >=3.12
+  go_router: ^17.2.3 # 17.3+ 需 Dart >=3.10
 
 dev_dependencies:
   flutter_test:
