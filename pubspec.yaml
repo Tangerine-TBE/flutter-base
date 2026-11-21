@@ -2,7 +2,7 @@ name: common
 description: A new Flutter package project.
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
